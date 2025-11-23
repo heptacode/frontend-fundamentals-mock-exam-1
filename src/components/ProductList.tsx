@@ -6,10 +6,23 @@ import { formatToKRW } from 'utils/format';
 
 interface ProductListProps {
   selectedProduct: SavingsProduct | null;
+  monthlyAmount: number;
+  term: number;
   onSelectProduct?: (product: SavingsProduct) => void;
 }
-export function ProductList({ selectedProduct, onSelectProduct }: ProductListProps) {
-  const { data: savingsProducts } = useQuery(getSavingsProducts.queryOptions);
+export function ProductList({ selectedProduct, monthlyAmount, term, onSelectProduct }: ProductListProps) {
+  const { data: savingsProducts } = useQuery(
+    getSavingsProducts.queryOptions({
+      select: data =>
+        data?.filter(product =>
+          monthlyAmount > 0
+            ? product.minMonthlyAmount < monthlyAmount &&
+              product.maxMonthlyAmount > monthlyAmount &&
+              product.availableTerms === term
+            : true
+        ),
+    })
+  );
 
   return (
     <>

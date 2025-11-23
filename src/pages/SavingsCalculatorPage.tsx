@@ -1,3 +1,4 @@
+import { commaizeNumber, decommaizeNumber } from '@toss/utils';
 import { CalculationResult } from 'components/CalculationResult';
 import { ProductList } from 'components/ProductList';
 import { TabContent } from 'components/ui/TabContent';
@@ -10,6 +11,9 @@ type TabType = 'products' | 'results';
 export function SavingsCalculatorPage() {
   const [tab, setTab] = useState<TabType>('products');
   const [selectedProduct, setSelectedProduct] = useState<SavingsProduct | null>(null);
+  const [targetAmount, setTargetAmount] = useState<number>(0);
+  const [monthlyAmount, setMonthlyAmount] = useState<number>(0);
+  const [term, setTerm] = useState<number>(12);
 
   return (
     <>
@@ -17,11 +21,23 @@ export function SavingsCalculatorPage() {
 
       <Spacing size={16} />
 
-      <TextField label="목표 금액" placeholder="목표 금액을 입력하세요" suffix="원" />
+      <TextField
+        label="목표 금액"
+        placeholder="목표 금액을 입력하세요"
+        suffix="원"
+        value={commaizeNumber(targetAmount)}
+        onChange={e => setTargetAmount(decommaizeNumber(e.target.value))}
+      />
       <Spacing size={16} />
-      <TextField label="월 납입액" placeholder="희망 월 납입액을 입력하세요" suffix="원" />
+      <TextField
+        label="월 납입액"
+        placeholder="희망 월 납입액을 입력하세요"
+        suffix="원"
+        value={commaizeNumber(monthlyAmount)}
+        onChange={e => setMonthlyAmount(decommaizeNumber(e.target.value))}
+      />
       <Spacing size={16} />
-      <SelectBottomSheet label="저축 기간" title="저축 기간을 선택해주세요" value={12} onChange={() => {}}>
+      <SelectBottomSheet label="저축 기간" title="저축 기간을 선택해주세요" value={term} onChange={setTerm}>
         <SelectBottomSheet.Option value={6}>6개월</SelectBottomSheet.Option>
         <SelectBottomSheet.Option value={12}>12개월</SelectBottomSheet.Option>
         <SelectBottomSheet.Option value={24}>24개월</SelectBottomSheet.Option>
@@ -43,7 +59,14 @@ export function SavingsCalculatorPage() {
       <TabContent
         tab={tab}
         content={{
-          products: <ProductList selectedProduct={selectedProduct} onSelectProduct={setSelectedProduct} />,
+          products: (
+            <ProductList
+              selectedProduct={selectedProduct}
+              onSelectProduct={setSelectedProduct}
+              monthlyAmount={monthlyAmount}
+              term={term}
+            />
+          ),
           results: <CalculationResult />,
         }}
       />
