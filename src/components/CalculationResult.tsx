@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { getSavingsProducts } from 'api/product';
 import { Assets, Spacing, Border, colors, ListHeader, ListRow } from 'tosslib';
 import type { SavingsProduct } from 'types';
@@ -60,7 +60,7 @@ interface CalculationResultProps {
   term: number;
 }
 export function CalculationResult({ selectedProduct, targetAmount, monthlyAmount, term }: CalculationResultProps) {
-  const { data: recommendedProducts } = useQuery(
+  const { data: recommendedProducts } = useSuspenseQuery(
     getSavingsProducts.queryOptions({
       select: data =>
         data

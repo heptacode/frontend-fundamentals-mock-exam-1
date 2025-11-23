@@ -2,8 +2,8 @@ import { commaizeNumber, decommaizeNumber } from '@toss/utils';
 import { CalculationResult } from 'components/CalculationResult';
 import { ProductList } from 'components/ProductList';
 import { TabContent } from 'components/ui/TabContent';
-import { useState } from 'react';
-import { Border, NavigationBar, SelectBottomSheet, Spacing, Tab, TextField } from 'tosslib';
+import { Suspense, useState } from 'react';
+import { Border, ListRow, NavigationBar, SelectBottomSheet, Spacing, Tab, TextField } from 'tosslib';
 import type { SavingsProduct } from 'types';
 
 type TabType = 'products' | 'results';
@@ -56,27 +56,29 @@ export function SavingsCalculatorPage() {
         </Tab.Item>
       </Tab>
 
-      <TabContent
-        tab={tab}
-        content={{
-          products: (
-            <ProductList
-              selectedProduct={selectedProduct}
-              monthlyAmount={monthlyAmount}
-              term={term}
-              onSelectProduct={setSelectedProduct}
-            />
-          ),
-          results: (
-            <CalculationResult
-              selectedProduct={selectedProduct}
-              targetAmount={targetAmount}
-              monthlyAmount={monthlyAmount}
-              term={term}
-            />
-          ),
-        }}
-      />
+      <Suspense fallback={<ListRow.Texts type="1RowTypeA" top="로딩중입니다..." />}>
+        <TabContent
+          tab={tab}
+          content={{
+            products: (
+              <ProductList
+                selectedProduct={selectedProduct}
+                monthlyAmount={monthlyAmount}
+                term={term}
+                onSelectProduct={setSelectedProduct}
+              />
+            ),
+            results: (
+              <CalculationResult
+                selectedProduct={selectedProduct}
+                targetAmount={targetAmount}
+                monthlyAmount={monthlyAmount}
+                term={term}
+              />
+            ),
+          }}
+        />
+      </Suspense>
     </>
   );
 }

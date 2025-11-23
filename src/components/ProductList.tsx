@@ -1,4 +1,4 @@
-import { useQuery } from '@tanstack/react-query';
+import { useSuspenseQuery } from '@tanstack/react-query';
 import { getSavingsProducts } from 'api/product';
 import { Assets, colors, ListRow, Spacing } from 'tosslib';
 import type { SavingsProduct } from 'types';
@@ -11,7 +11,7 @@ interface ProductListProps {
   onSelectProduct?: (product: SavingsProduct) => void;
 }
 export function ProductList({ selectedProduct, monthlyAmount, term, onSelectProduct }: ProductListProps) {
-  const { data: savingsProducts } = useQuery(
+  const { data: savingsProducts } = useSuspenseQuery(
     getSavingsProducts.queryOptions({
       select: data =>
         data?.filter(product =>

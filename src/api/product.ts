@@ -1,4 +1,4 @@
-import type { UseQueryOptions } from '@tanstack/react-query';
+import type { UseSuspenseQueryOptions } from '@tanstack/react-query';
 import { http, isHttpError } from 'tosslib';
 import type { SavingsProduct } from 'types';
 
@@ -12,9 +12,9 @@ export async function getSavingsProducts(): Promise<SavingsProduct[] | undefined
   }
 }
 getSavingsProducts.apiPath = '/api/savings-products';
-getSavingsProducts.queryOptions = (options?: Partial<UseQueryOptions<SavingsProduct[] | undefined>>) =>
+getSavingsProducts.queryOptions = (options?: Partial<UseSuspenseQueryOptions<SavingsProduct[] | undefined>>) =>
   ({
     queryKey: [getSavingsProducts.apiPath],
     queryFn: getSavingsProducts,
     ...options,
-  }) satisfies UseQueryOptions<SavingsProduct[] | undefined>;
+  }) satisfies UseSuspenseQueryOptions<SavingsProduct[] | undefined>;
