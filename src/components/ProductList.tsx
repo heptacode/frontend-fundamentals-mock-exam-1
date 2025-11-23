@@ -19,7 +19,7 @@ export function ProductList({ selectedProduct, monthlyAmount, term, onSelectProd
             ? product.minMonthlyAmount < monthlyAmount &&
               product.maxMonthlyAmount > monthlyAmount &&
               product.availableTerms === term
-            : true
+            : product.availableTerms === term
         ),
     })
   );
