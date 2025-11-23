@@ -1,17 +1,26 @@
 import { Spacing, Border, colors, ListHeader, ListRow } from 'tosslib';
+import type { SavingsProduct } from 'types';
+import { formatToKRW } from 'utils/format';
 
-export function CalculationResult() {
+function CalculationResultDisplay({ selectedProduct, targetAmount, monthlyAmount, term }: CalculationResultProps) {
+  if (!selectedProduct) {
+    return <ListRow contents={<ListRow.Texts type="1RowTypeA" top="상품을 선택해주세요." />} />;
+  }
+
+  const estimatedProfit = monthlyAmount * term * (1 + selectedProduct.annualRate * 0.5);
+  const difference = targetAmount - estimatedProfit;
+  const recommendedMonthlyAmount =
+    Math.round(targetAmount / (term * (1 + selectedProduct.annualRate * 0.5)) / 1000) * 1000;
+
   return (
     <>
-      <Spacing size={8} />
-
       <ListRow
         contents={
           <ListRow.Texts
             type="2RowTypeA"
             top="예상 수익 금액"
             topProps={{ color: colors.grey600 }}
-            bottom={`1,000,000원`}
+            bottom={formatToKRW(estimatedProfit)}
             bottomProps={{ fontWeight: 'bold', color: colors.blue600 }}
           />
         }
@@ -22,7 +31,7 @@ export function CalculationResult() {
             type="2RowTypeA"
             top="목표 금액과의 차이"
             topProps={{ color: colors.grey600 }}
-            bottom={`-500,000원`}
+            bottom={formatToKRW(difference)}
             bottomProps={{ fontWeight: 'bold', color: colors.blue600 }}
           />
         }
@@ -33,10 +42,31 @@ export function CalculationResult() {
             type="2RowTypeA"
             top="추천 월 납입 금액"
             topProps={{ color: colors.grey600 }}
-            bottom={`100,000원`}
+            bottom={formatToKRW(recommendedMonthlyAmount)}
             bottomProps={{ fontWeight: 'bold', color: colors.blue600 }}
           />
         }
+      />
+    </>
+  );
+}
+
+interface CalculationResultProps {
+  selectedProduct: SavingsProduct | null;
+  targetAmount: number;
+  monthlyAmount: number;
+  term: number;
+}
+export function CalculationResult({ selectedProduct, targetAmount, monthlyAmount, term }: CalculationResultProps) {
+  return (
+    <>
+      <Spacing size={8} />
+
+      <CalculationResultDisplay
+        selectedProduct={selectedProduct}
+        targetAmount={targetAmount}
+        monthlyAmount={monthlyAmount}
+        term={term}
       />
 
       <Spacing size={8} />
@@ -78,7 +108,6 @@ export function CalculationResult() {
       <Spacing size={40} />
 
       {/* 아래는 사용자가 적금 상품을 선택하지 않고 계산 결과 탭을 선택했을 때 출력해주세요. */}
-      {/* <ListRow contents={<ListRow.Texts type="1RowTypeA" top="상품을 선택해주세요." />} /> */}
     </>
   );
 }
