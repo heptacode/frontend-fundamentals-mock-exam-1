@@ -3,11 +3,13 @@ import { ProductList } from 'components/ProductList';
 import { TabContent } from 'components/ui/TabContent';
 import { useState } from 'react';
 import { Border, NavigationBar, SelectBottomSheet, Spacing, Tab, TextField } from 'tosslib';
+import type { SavingsProduct } from 'types';
 
 type TabType = 'products' | 'results';
 
 export function SavingsCalculatorPage() {
   const [tab, setTab] = useState<TabType>('products');
+  const [selectedProduct, setSelectedProduct] = useState<SavingsProduct | null>(null);
 
   return (
     <>
@@ -41,7 +43,7 @@ export function SavingsCalculatorPage() {
       <TabContent
         tab={tab}
         content={{
-          products: <ProductList />,
+          products: <ProductList selectedProduct={selectedProduct} onSelectProduct={setSelectedProduct} />,
           results: <CalculationResult />,
         }}
       />
