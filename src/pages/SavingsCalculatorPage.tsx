@@ -1,8 +1,10 @@
 import { commaizeNumber, decommaizeNumber } from '@toss/utils';
 import { CalculationResult } from 'components/CalculationResult';
+import { ErrorFallback } from 'components/ErrorFallback';
 import { ProductList } from 'components/ProductList';
 import { TabContent } from 'components/ui/TabContent';
 import { Suspense, useState } from 'react';
+import { ErrorBoundary } from 'react-error-boundary';
 import { Border, ListRow, NavigationBar, SelectBottomSheet, Spacing, Tab, TextField } from 'tosslib';
 import type { SavingsProduct } from 'types';
 
@@ -56,29 +58,31 @@ export function SavingsCalculatorPage() {
         </Tab.Item>
       </Tab>
 
-      <Suspense fallback={<ListRow.Texts type="1RowTypeA" top="로딩중입니다..." />}>
-        <TabContent
-          tab={tab}
-          content={{
-            products: (
-              <ProductList
-                selectedProduct={selectedProduct}
-                monthlyAmount={monthlyAmount}
-                term={term}
-                onSelectProduct={setSelectedProduct}
-              />
-            ),
-            results: (
-              <CalculationResult
-                selectedProduct={selectedProduct}
-                targetAmount={targetAmount}
-                monthlyAmount={monthlyAmount}
-                term={term}
-              />
-            ),
-          }}
-        />
-      </Suspense>
+      <ErrorBoundary FallbackComponent={ErrorFallback}>
+        <Suspense fallback={<ListRow.Texts type="1RowTypeA" top="로딩중입니다..." />}>
+          <TabContent
+            tab={tab}
+            content={{
+              products: (
+                <ProductList
+                  selectedProduct={selectedProduct}
+                  monthlyAmount={monthlyAmount}
+                  term={term}
+                  onSelectProduct={setSelectedProduct}
+                />
+              ),
+              results: (
+                <CalculationResult
+                  selectedProduct={selectedProduct}
+                  targetAmount={targetAmount}
+                  monthlyAmount={monthlyAmount}
+                  term={term}
+                />
+              ),
+            }}
+          />
+        </Suspense>
+      </ErrorBoundary>
     </>
   );
 }

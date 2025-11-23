@@ -12,6 +12,7 @@
     "@toss/utils": "^1.6.1",
     "react": "^18",
     "react-dom": "^18",
+    "react-error-boundary": "^6.0.0",
     "react-router-dom": "^7.1.1",
     "tosslib": "file:./tosslib.tgz"
   },

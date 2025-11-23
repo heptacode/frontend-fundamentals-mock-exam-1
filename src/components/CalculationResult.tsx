@@ -94,7 +94,7 @@ export function CalculationResult({ selectedProduct, targetAmount, monthlyAmount
       <ListHeader title={<ListHeader.TitleParagraph fontWeight="bold">추천 상품 목록</ListHeader.TitleParagraph>} />
       <Spacing size={12} />
 
-      {recommendedProducts?.map(product => {
+      {recommendedProducts.map(product => {
         const isSelected = selectedProduct?.id === product.id;
 
         return (

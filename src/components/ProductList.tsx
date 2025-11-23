@@ -28,7 +28,7 @@ export function ProductList({ selectedProduct, monthlyAmount, term, onSelectProd
     <>
       <Spacing size={8} />
 
-      {savingsProducts?.map(product => {
+      {savingsProducts.map(product => {
         const isSelected = selectedProduct?.id === product.id;
 
         return (
