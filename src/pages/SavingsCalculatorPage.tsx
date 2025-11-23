@@ -15,6 +15,20 @@ export function SavingsCalculatorPage() {
   const [monthlyAmount, setMonthlyAmount] = useState<number>(0);
   const [term, setTerm] = useState<number>(12);
 
+  function handleTargetAmountChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const value = decommaizeNumber(e.target.value);
+    if (!isNaN(value)) {
+      setTargetAmount(value);
+    }
+  }
+
+  function handleMonthlyAmountChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const value = decommaizeNumber(e.target.value);
+    if (!isNaN(value)) {
+      setMonthlyAmount(value);
+    }
+  }
+
   return (
     <>
       <NavigationBar title="적금 계산기" />
@@ -26,7 +40,7 @@ export function SavingsCalculatorPage() {
         placeholder="목표 금액을 입력하세요"
         suffix="원"
         value={commaizeNumber(targetAmount)}
-        onChange={e => setTargetAmount(decommaizeNumber(e.target.value))}
+        onChange={handleTargetAmountChange}
       />
       <Spacing size={16} />
       <TextField
@@ -34,7 +48,7 @@ export function SavingsCalculatorPage() {
         placeholder="희망 월 납입액을 입력하세요"
         suffix="원"
         value={commaizeNumber(monthlyAmount)}
-        onChange={e => setMonthlyAmount(decommaizeNumber(e.target.value))}
+        onChange={handleMonthlyAmountChange}
       />
       <Spacing size={16} />
       <SelectBottomSheet label="저축 기간" title="저축 기간을 선택해주세요" value={term} onChange={setTerm}>
@@ -67,7 +81,14 @@ export function SavingsCalculatorPage() {
               term={term}
             />
           ),
-          results: <CalculationResult />,
+          results: (
+            <CalculationResult
+              selectedProduct={selectedProduct}
+              targetAmount={targetAmount}
+              monthlyAmount={monthlyAmount}
+              term={term}
+            />
+          ),
         }}
       />
     </>
