@@ -76,9 +76,9 @@ export function SavingsCalculatorPage() {
           products: (
             <ProductList
               selectedProduct={selectedProduct}
-              onSelectProduct={setSelectedProduct}
               monthlyAmount={monthlyAmount}
               term={term}
+              onSelectProduct={setSelectedProduct}
             />
           ),
           results: (
