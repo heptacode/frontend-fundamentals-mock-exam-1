@@ -1,21 +1,20 @@
-import { commaizeNumber, decommaizeNumber } from '@toss/utils';
 import { CalculationResult } from 'components/CalculationResult';
-import { ErrorFallback } from 'components/ErrorFallback';
 import { ProductList } from 'components/ProductList';
+import { SuspenseBoundary } from 'components/SuspenseBoundary';
+import { AmountInput } from 'components/ui/AmountInput';
+import { SavingsTermSelect } from 'components/ui/SavingsTermSelect';
 import { TabContent } from 'components/ui/TabContent';
-import { Suspense, useState } from 'react';
-import { ErrorBoundary } from 'react-error-boundary';
-import { Border, ListRow, NavigationBar, SelectBottomSheet, Spacing, Tab, TextField } from 'tosslib';
-import type { SavingsProduct } from 'types';
+import { filterByMonthlyAmount, filterByTerm, orderByAnnualRate } from 'domain/savings-product';
+import { useSavingsParams } from 'hooks/useSavingsParams';
+import { useState } from 'react';
+import { Border, ListHeader, ListRow, NavigationBar, Spacing, Tab } from 'tosslib';
 
 type TabType = 'products' | 'results';
 
 export function SavingsCalculatorPage() {
   const [tab, setTab] = useState<TabType>('products');
-  const [selectedProduct, setSelectedProduct] = useState<SavingsProduct | null>(null);
-  const [targetAmount, setTargetAmount] = useState<number>(0);
-  const [monthlyAmount, setMonthlyAmount] = useState<number>(0);
-  const [term, setTerm] = useState<number>(12);
+
+  const [{ targetAmount, monthlyAmount, term }, setSavingsParams] = useSavingsParams();
 
   return (
     <>
@@ -23,27 +22,27 @@ export function SavingsCalculatorPage() {
 
       <Spacing size={16} />
 
-      <TextField
+      <AmountInput
         label="목표 금액"
         placeholder="목표 금액을 입력하세요"
-        suffix="원"
-        value={commaizeNumber(targetAmount)}
-        onChange={e => setTargetAmount(prev => decommaizeNumber(e.target.value) || prev)}
+        value={targetAmount}
+        onChange={value => setSavingsParams({ targetAmount: value })}
       />
       <Spacing size={16} />
-      <TextField
+      <AmountInput
         label="월 납입액"
         placeholder="희망 월 납입액을 입력하세요"
-        suffix="원"
-        value={commaizeNumber(monthlyAmount)}
-        onChange={e => setMonthlyAmount(prev => decommaizeNumber(e.target.value) || prev)}
+        value={monthlyAmount}
+        onChange={value => setSavingsParams({ monthlyAmount: value })}
       />
       <Spacing size={16} />
-      <SelectBottomSheet label="저축 기간" title="저축 기간을 선택해주세요" value={term} onChange={setTerm}>
-        <SelectBottomSheet.Option value={6}>6개월</SelectBottomSheet.Option>
-        <SelectBottomSheet.Option value={12}>12개월</SelectBottomSheet.Option>
-        <SelectBottomSheet.Option value={24}>24개월</SelectBottomSheet.Option>
-      </SelectBottomSheet>
+      <SavingsTermSelect
+        label="저축 기간"
+        title="저축 기간을 선택해주세요"
+        terms={[6, 12, 24]}
+        value={term}
+        onChange={value => setSavingsParams({ term: value })}
+      />
 
       <Spacing size={24} />
       <Border height={16} />
@@ -58,31 +57,38 @@ export function SavingsCalculatorPage() {
         </Tab.Item>
       </Tab>
 
-      <ErrorBoundary FallbackComponent={ErrorFallback}>
-        <Suspense fallback={<ListRow.Texts type="1RowTypeA" top="로딩중입니다..." />}>
-          <TabContent
-            tab={tab}
-            content={{
-              products: (
+      <Spacing size={8} />
+
+      <TabContent
+        tab={tab}
+        content={{
+          products: (
+            <SuspenseBoundary fallback={<ListRow.Texts type="1RowTypeA" top="상품을 불러오는 중..." />}>
+              <ProductList filters={[x => filterByMonthlyAmount(x, monthlyAmount), x => filterByTerm(x, term)]} />
+            </SuspenseBoundary>
+          ),
+          results: (
+            <>
+              <CalculationResult />
+              <Spacing size={8} />
+              <Border height={16} />
+              <Spacing size={8} />
+              <ListHeader
+                title={<ListHeader.TitleParagraph fontWeight="bold">추천 상품 목록</ListHeader.TitleParagraph>}
+              />
+              <SuspenseBoundary fallback={<ListRow.Texts type="1RowTypeA" top="상품을 불러오는 중..." />}>
                 <ProductList
-                  selectedProduct={selectedProduct}
-                  monthlyAmount={monthlyAmount}
-                  term={term}
-                  onSelectProduct={setSelectedProduct}
+                  filters={[x => filterByMonthlyAmount(x, monthlyAmount), x => filterByTerm(x, term)]}
+                  orderBy={orderByAnnualRate}
+                  limit={2}
                 />
-              ),
-              results: (
-                <CalculationResult
-                  selectedProduct={selectedProduct}
-                  targetAmount={targetAmount}
-                  monthlyAmount={monthlyAmount}
-                  term={term}
-                />
-              ),
-            }}
-          />
-        </Suspense>
-      </ErrorBoundary>
+              </SuspenseBoundary>
+            </>
+          ),
+        }}
+      />
+
+      <Spacing size={40} />
     </>
   );
 }

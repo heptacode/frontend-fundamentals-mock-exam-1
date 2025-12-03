@@ -1,7 +1,13 @@
 import type { UseSuspenseQueryOptions } from '@tanstack/react-query';
+import type { FilterSavingsProduct, OrderBySavingsProduct } from 'domain/savings-product';
 import { http, isHttpError } from 'tosslib';
 import type { SavingsProduct } from 'types';
 
+interface GetSavingsProductsOptions {
+  filters?: FilterSavingsProduct[];
+  orderBy?: OrderBySavingsProduct;
+  limit?: number;
+}
 export async function getSavingsProducts(): Promise<SavingsProduct[]> {
   try {
     return await http.get<SavingsProduct[]>(getSavingsProducts.apiPath);
@@ -16,9 +22,14 @@ export async function getSavingsProducts(): Promise<SavingsProduct[]> {
   }
 }
 getSavingsProducts.apiPath = '/api/savings-products';
-getSavingsProducts.queryOptions = (options?: Partial<UseSuspenseQueryOptions<SavingsProduct[]>>) =>
+getSavingsProducts.queryOptions = ({ filters, orderBy, limit = Infinity }: GetSavingsProductsOptions) =>
   ({
     queryKey: [getSavingsProducts.apiPath],
     queryFn: getSavingsProducts,
-    ...options,
+    select: data => {
+      const filteredData = data.filter(x => filters?.every(filter => filter(x)));
+      const sortedData = orderBy ? filteredData.sort(orderBy) : filteredData;
+
+      return sortedData.slice(0, limit);
+    },
   }) satisfies UseSuspenseQueryOptions<SavingsProduct[]>;

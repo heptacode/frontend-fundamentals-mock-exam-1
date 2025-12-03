@@ -1,55 +1,80 @@
+import { css } from '@emotion/react';
 import { useSuspenseQuery } from '@tanstack/react-query';
+import { commaizeNumber } from '@toss/utils';
 import { getSavingsProducts } from 'api/product';
-import { Assets, colors, ListRow, Spacing } from 'tosslib';
-import type { SavingsProduct } from 'types';
-import { formatToKRW } from 'utils/format';
+import { FilterSavingsProduct, OrderBySavingsProduct } from 'domain/savings-product';
+import { useSelectedProductId } from 'hooks/useSelectedProductId';
+import { Assets, colors, ListRow } from 'tosslib';
+import { SavingsProduct } from 'types';
 
 interface ProductListProps {
-  selectedProduct: SavingsProduct | null;
-  monthlyAmount: number;
-  term: number;
-  onSelectProduct?: (product: SavingsProduct) => void;
+  filters?: FilterSavingsProduct[];
+  orderBy?: OrderBySavingsProduct;
+  limit?: number;
 }
-export function ProductList({ selectedProduct, monthlyAmount, term, onSelectProduct }: ProductListProps) {
-  const { data: savingsProducts } = useSuspenseQuery(
-    getSavingsProducts.queryOptions({
-      select: data =>
-        data?.filter(product =>
-          monthlyAmount > 0
-            ? product.minMonthlyAmount < monthlyAmount &&
-              product.maxMonthlyAmount > monthlyAmount &&
-              product.availableTerms === term
-            : product.availableTerms === term
-        ),
-    })
-  );
+export function ProductList({ filters, orderBy, limit }: ProductListProps) {
+  const { data } = useSuspenseQuery(getSavingsProducts.queryOptions({ filters, orderBy, limit }));
+
+  if (data.length === 0) {
+    return <ListRow contents={<ListRow.Texts type="1RowTypeA" top="조건에 맞는 상품이 없어요." />} />;
+  }
 
   return (
     <>
-      <Spacing size={8} />
-
-      {savingsProducts.map(product => {
-        const isSelected = selectedProduct?.id === product.id;
-
+      {data.map(product => {
         return (
-          <ListRow
+          <ProductList.Item
             key={product.id}
-            contents={
-              <ListRow.Texts
-                type="3RowTypeA"
-                top={product.name}
-                topProps={{ fontSize: 16, fontWeight: 'bold', color: colors.grey900 }}
-                middle={`연 이자율: ${product.annualRate}%`}
-                middleProps={{ fontSize: 14, color: colors.blue600, fontWeight: 'medium' }}
-                bottom={`${formatToKRW(product.minMonthlyAmount)} ~ ${formatToKRW(product.maxMonthlyAmount)} | ${product.availableTerms}개월`}
-                bottomProps={{ fontSize: 13, color: colors.grey600 }}
-              />
-            }
-            right={isSelected && <Assets.Icon name="icon-check-circle-green" />}
-            onClick={() => onSelectProduct?.(product)}
+            id={product.id}
+            top={product.name}
+            middle={`연 이자율: ${product.annualRate}%`}
+            bottom={`${commaizeNumber(product.minMonthlyAmount)}원 ~ ${commaizeNumber(product.maxMonthlyAmount)}원 | ${product.availableTerms}개월`}
           />
         );
       })}
     </>
   );
 }
+
+ProductList.Item = function Item({
+  id,
+  top,
+  middle,
+  bottom,
+}: {
+  id: SavingsProduct['id'];
+  top: string;
+  middle: string;
+  bottom: string;
+}) {
+  const [selectedProductId, setSelectedProductId] = useSelectedProductId();
+
+  return (
+    <button css={resetButtonStyle} key={id} onClick={() => setSelectedProductId(id)}>
+      <ListRow
+        contents={
+          <ListRow.Texts
+            type="3RowTypeA"
+            top={top}
+            topProps={{ fontSize: 16, fontWeight: 'bold', color: colors.grey900 }}
+            middle={middle}
+            middleProps={{ fontSize: 14, color: colors.blue600, fontWeight: 'medium' }}
+            bottom={bottom}
+            bottomProps={{ fontSize: 13, color: colors.grey600 }}
+          />
+        }
+        right={selectedProductId === id && <Assets.Icon name="icon-check-circle-green" />}
+      />
+    </button>
+  );
+};
+
+const resetButtonStyle = css`
+  padding: 0;
+  display: flex;
+  width: 100%;
+  background: none;
+  border: none;
+  outline: none;
+  cursor: pointer;
+`;
